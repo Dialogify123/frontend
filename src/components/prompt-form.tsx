@@ -3,8 +3,6 @@
 import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
 
-// import { useActions, useUIState } from 'ai/rsc'
-
 import { UserMessage } from './stocks/message'
 // import { type AI } from '@/lib/chat/actions'
 import { Button } from '@/components/ui/button'
@@ -20,10 +18,14 @@ import { useRouter } from 'next/navigation'
 
 export function PromptForm({
   input,
-  setInput
+  setInput,
+  setMessages,
+  sendMessageHandler
 }: {
   input: string
   setInput: (value: string) => void
+  setMessages: any,
+  sendMessageHandler: (value: string) => void
 }) {
   const router = useRouter()
   const { formRef, onKeyDown } = useEnterSubmit()
@@ -52,18 +54,19 @@ export function PromptForm({
         setInput('')
         if (!value) return
 
-        // // Optimistically add user message UI
-        // setMessages((currentMessages: any) => [
-        //   ...currentMessages,
-        //   {
-        //     id: nanoid(),
-        //     display: <UserMessage>{value}</UserMessage>
-        //   }
-        // ])
-
+        // Optimistically add user message UI
+        setMessages((currentMessages: any) => [
+          ...currentMessages,
+          {
+            role: 'user',
+            content: value
+          }
+        ])
++
         // Submit and get response message
-        // const responseMessage = await submitUserMessage(value)
-        // setMessages((currentMessages: any) => [...currentMessages, responseMessage])
+        sendMessageHandler(value)
+        // const responseMessage = await sendMessageHandler(value)
+        // setMessages((currentMessages: any) => [...currentMessages, {role: 'assistant', content: responseMessage}])
       }}
     >
       <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">

@@ -10,6 +10,7 @@ import { FooterText } from '@/components/footer'
 // import { useAIState, useActions, useUIState } from 'ai/rsc'
 import { nanoid } from 'nanoid'
 import { UserMessage } from './stocks/message'
+import { Message } from '@/lib/chat/actions'
 
 export interface ChatPanelProps {
   id?: string
@@ -18,6 +19,9 @@ export interface ChatPanelProps {
   setInput: (value: string) => void
   isAtBottom: boolean
   scrollToBottom: () => void
+  messages: Message[]
+  setMessages: any
+  sendMessageHandler: (value: string) => void
 }
 
 export function ChatPanel({
@@ -26,13 +30,16 @@ export function ChatPanel({
   input,
   setInput,
   isAtBottom,
-  scrollToBottom
+  scrollToBottom,
+  messages,
+  setMessages,
+  sendMessageHandler
 }: ChatPanelProps) {
   // const [aiState] = useAIState()
   // const [messages, setMessages] = useUIState<typeof AI>()
   // const { submitUserMessage } = useActions()
   // const [messages, setMessages] = React.useState<any[]>()
-  const messages: any = []
+
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
 
   const exampleMessages = [
@@ -131,7 +138,7 @@ export function ChatPanel({
         ) : null}
 
         <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
-          <PromptForm input={input} setInput={setInput} />
+          <PromptForm input={input} setInput={setInput} setMessages={setMessages} sendMessageHandler={sendMessageHandler}/>
           <FooterText className="hidden sm:block" />
         </div>
       </div>

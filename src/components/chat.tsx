@@ -12,6 +12,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Message } from '@/lib/chat/actions'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
+import { io } from 'socket.io-client'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
     initialMessages?: Message[]
@@ -20,33 +21,67 @@ export interface ChatProps extends React.ComponentProps<'div'> {
     missingKeys: string[]
 }
 
+interface AssistantMessage {
+    content: string;
+}
+
 export function Chat({ id, className, session, missingKeys }: ChatProps) {
     const router = useRouter()
     const path = usePathname()
     const [input, setInput] = useState('')
-
-    // const [messages] = useUIState()
-    // const [aiState] = useAIState()
-
-    const messages: any = []
-    const aiState: any = []
-
     const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
-    useEffect(() => {
-        if (session?.user) {
-            if (!path.includes('chat') && messages.length === 1) {
-                window.history.replaceState({}, '', `/chat/${id}`)
-            }
-        }
-    }, [id, path, session?.user, messages])
+    const [socket, setSocket] = useState<any | null>(null);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
-        const messagesLength = aiState.messages?.length
-        if (messagesLength === 2) {
-            router.refresh()
+        console.log('Backend URL: ', process.env.NEXT_PUBLIC_BACKEND_URL)
+        const socketUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}`
+        const newSocket = io(socketUrl, {
+            path: '/message',
+            transports: ['websocket'],
+        });
+        setSocket(newSocket);
+
+        newSocket.on('connect', () => {
+            console.log('Connected to assistant.');
+        })
+
+        newSocket.on('message', (data: AssistantMessage) => {
+            setMessages((prevMessages) => [...prevMessages, {role: 'assistant', content: data.content}])
+        });
+
+        // return () => { newSocket.disconnect() };
+    }, []);
+
+    // const sendMessage = () => {
+    //     if (socket && message) {
+    //         socket.emit('message', message);
+    //         setMessage('')
+    //     }
+    // }
+
+    const sendMessageHandler = (value: string) => {
+        if (socket && message) {
+            socket.emit('message', value)
         }
-    }, [aiState.messages, router])
+    }
+
+    // useEffect(() => {
+    //     if (session?.user) {
+    //         if (!path.includes('chat') && messages.length === 1) {
+    //             window.history.replaceState({}, '', `/chat/${id}`)
+    //         }
+    //     }
+    // }, [id, path, session?.user, messages])
+
+    // useEffect(() => {
+    //     const messagesLength = aiState.messages?.length
+    //     if (messagesLength === 2) {
+    //         router.refresh()
+    //     }
+    // }, [aiState.messages, router])
 
     useEffect(() => {
         setNewChatId(id)
@@ -67,7 +102,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
             ref={scrollRef}
         >
             <div
-                className={cn('pb-[320px] pt-4 md:pt-10', className)}
+                className={cn(messages.length === 0 ? 'pb-[320px] pt-4 md:pt-10' : 'pb-[140px] pt-4 md:pt-10', className)}
                 ref={messagesRef}
             >
                 {messages.length ? (
@@ -76,13 +111,16 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
                     <EmptyScreen />
                 )}
                 <div className="h-px w-full" ref={visibilityRef} />
-            </div>
+            </div>  
             <ChatPanel
                 id={id}
                 input={input}
                 setInput={setInput}
                 isAtBottom={isAtBottom}
                 scrollToBottom={scrollToBottom}
+                messages={messages}
+                setMessages={setMessages}
+                sendMessageHandler={sendMessageHandler}
             />
         </div>
     )
