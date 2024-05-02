@@ -5,14 +5,13 @@ import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { EmptyScreen } from '@/components/empty-screen'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 // import { useUIState, useAIState } from 'ai/rsc'
 import { Session } from '@/lib/types'
 import { usePathname, useRouter } from 'next/navigation'
 import { Message } from '@/lib/chat/actions'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
-import { io } from 'socket.io-client'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
     initialMessages?: Message[]
@@ -31,28 +30,27 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
     const [input, setInput] = useState('')
     const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
-    const [socket, setSocket] = useState<any | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [message, setMessage] = useState('');
+
+    const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
         console.log('Backend URL: ', process.env.NEXT_PUBLIC_BACKEND_URL)
         const socketUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}`
-        const newSocket = io(socketUrl, {
-            path: '/message',
-            transports: ['websocket'],
-        });
-        setSocket(newSocket);
+        const socket = new WebSocket(socketUrl)
+        socketRef.current = socket
 
-        newSocket.on('connect', () => {
+        socket.addEventListener('open', () => {
             console.log('Connected to assistant.');
-        })
-
-        newSocket.on('message', (data: AssistantMessage) => {
-            setMessages((prevMessages) => [...prevMessages, {role: 'assistant', content: data.content}])
         });
 
-        // return () => { newSocket.disconnect() };
+        socket.addEventListener('message', (event) => {
+            const data: AssistantMessage = JSON.parse(event.data);
+            setMessages((prevMessages) => [...prevMessages, {role: 'assistant', content: data.content}]);
+        });
+
+        // return () => { socket.close() };
     }, []);
 
     // const sendMessage = () => {
@@ -63,8 +61,11 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
     // }
 
     const sendMessageHandler = (value: string) => {
-        if (socket && message) {
-            socket.emit('message', value)
+        if (value && socketRef.current) {
+            console.log('Sending message.')
+            socketRef.current.send(value)
+        } else {
+            console.log(`Message: ${value}, Socket: ${socketRef.current}`)
         }
     }
 
