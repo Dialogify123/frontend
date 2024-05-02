@@ -5,7 +5,7 @@ import { getMissingKeys } from "./actions";
 import { Providers } from "@/components/providers";
 
 export const metadata = {
-  title: 'Cloudify AI Chatbot'
+  title: 'Cloudbot'
 }
 
 
