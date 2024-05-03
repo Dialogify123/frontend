@@ -9,6 +9,7 @@ import {
     IconVercel
 } from './ui/icons'
 import { Button, buttonVariants } from './ui/button'
+import SessionForm from './session-form'
 
 export function Header() {
     return (
@@ -24,6 +25,10 @@ export function Header() {
                     <IconGitHub />
                     <span className="hidden ml-2 md:flex">GitHub</span>
                 </a>
+            </div>
+
+            <div>
+                <SessionForm />
             </div>
         </header>
     )
