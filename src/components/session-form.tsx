@@ -1,4 +1,4 @@
-'use client'
+ 'use client'
 
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -31,12 +31,16 @@ const SessionForm = () => {
                 if (event.target?.result) {
                     const jsonData = JSON.parse(event?.target.result as string)
                     body = { ...jsonData }
+                    console.log(body);
+                    console.log(1);
                     submitData(body)
                 }
             }
             reader.readAsText(selectedFile)
         } else {
             body = data;
+            console.log(body);
+            console.log(2);
             submitData(body)
         }
     }
@@ -50,6 +54,9 @@ const SessionForm = () => {
 
             if (!response.ok) {
                 throw new Error(`Error submitting session data: ${response.statusText}`)
+            }
+            else{
+                console.log(response.body);
             }
         } catch (error) {
             console.error(error)

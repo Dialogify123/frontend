@@ -3,8 +3,8 @@ import { Message, UIState } from '@/lib/chat/actions'
 import { Session } from '@/lib/types'
 import Link from 'next/link'
 import { IconOpenAI, IconUser } from './ui/icons'
+import ReactMarkDown from "react-markdown"
 // import { ExclamationTriangleIcon } from '@radix-ui/react-icons'
-
 export interface ChatList {
   messages: Message[]
   session?: Session
@@ -33,7 +33,11 @@ export function ChatList({ messages, session, isShared }: ChatList) {
         <div key={index}>
           {message.role === 'user'
             ? <UserMessage>{message.content}</UserMessage>
-            : <AssistantMessage>{message.content}</AssistantMessage>
+            : <AssistantMessage>
+              <ReactMarkDown>
+              {message.content}
+              </ReactMarkDown>
+              </AssistantMessage>
           }
           {index < messages.length - 1 && <Separator className="my-4" />}
         </div>

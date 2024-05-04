@@ -36,8 +36,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
     const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        console.log('Backend URL: ', process.env.NEXT_PUBLIC_BACKEND_URL)
-        const socketUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}`
+        const socketUrl = "ws://127.0.0.1:8000/message"
         const socket = new WebSocket(socketUrl)
         socketRef.current = socket
 
@@ -46,8 +45,8 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
         });
 
         socket.addEventListener('message', (event) => {
-            const data: AssistantMessage = JSON.parse(event.data);
-            setMessages((prevMessages) => [...prevMessages, {role: 'assistant', content: data.content}]);
+            const data: string = event.data;
+            setMessages((prevMessages) => [...prevMessages, {role: 'assistant', content: data}]);
         });
 
         // return () => { socket.close() };

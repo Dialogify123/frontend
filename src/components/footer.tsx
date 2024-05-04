@@ -15,7 +15,7 @@ export function FooterText({ className, ...props }: React.ComponentProps<'p'>) {
       Cloudify is an AI chatbot built with{' '}
       <ExternalLink href="https://nextjs.org">Next.js</ExternalLink> and{' '}
       <ExternalLink href="https://github.com/dialogify123">
-        Dialogify123 team
+        CloudBot team
       </ExternalLink>
       .
     </p>
