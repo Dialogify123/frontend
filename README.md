@@ -1,3 +1,7 @@
+![Cloudtalk](./Cloudtalk.png)
+
+**Note:** The backend for this project can be found at [this](https://github.com/Dialogify123/assistant_api_chat_app_public) repository.
+
 ##  Deploy with Ease: Your Cloud Assistant
 
 This project is a frontend for an LLM application that assists with deploying applications to the cloud. 
